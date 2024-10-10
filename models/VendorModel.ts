@@ -27,12 +27,24 @@ const VendorSchema = new Schema(
 		email: { type: String, required: true },
 		password: { type: String, required: true },
 		salt: { type: String, required: true },
-		serviceAvailabel: { type: Boolean },
-		coverImages: { type: [String] },
-		rating: { type: Number },
+		serviceAvailabel: { type: Boolean, default: false },
+		coverImages: { type: [String], default: [] },
+		rating: { type: Number, default: 0 },
 		// foods: { type: mongoose.Schema.ObjectId, ref: "Food" },
 	},
-	{ timestamps: true }
+
+	{
+		toJSON: {
+			transform(doc, res) {
+				delete res.salt;
+				delete res.password;
+				delete res.__v;
+				delete res.createdAt;
+				delete res.updatedAt;
+			},
+		},
+		timestamps: true,
+	}
 );
 
 const Vendor = model<VendorDoc>("Vendor", VendorSchema);
