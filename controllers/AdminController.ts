@@ -1,8 +1,16 @@
-import express, { Request, Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { createVendorInput } from "../dto";
 import { Vendor } from "../models";
 
 import { generateSalt, hashPassowrd } from "../utility";
+
+export const FindVendor = async (id: string | undefined, email?: string) => {
+	if (email) {
+		return await Vendor.findOne({ email });
+	} else {
+		return await Vendor.findById(id);
+	}
+};
 
 export const createVendor = async (
 	req: Request,
@@ -20,7 +28,7 @@ export const createVendor = async (
 		phone,
 	} = <createVendorInput>req.body;
 
-	const exisitingVendor = await Vendor.findOne({ email });
+	const exisitingVendor = await FindVendor(undefined, String(email));
 
 	if (exisitingVendor !== null) {
 		return res
@@ -37,7 +45,7 @@ export const createVendor = async (
 		pincode,
 		foodType,
 		email,
-		password: hashPassowrd,
+		password: hashedPassword,
 		salt,
 		ownerName,
 		phone,
@@ -56,10 +64,9 @@ export const getVendors = async (
 		return res.status(200).json(vendors);
 	}
 
-	return res
-		.status(400)
-		.json({ message: "there is not eny vendors" });
+	return res.status(400).json({ message: "there is not eny vendors" });
 };
+
 export const getVendor = async (
 	req: Request,
 	res: Response,
@@ -67,10 +74,10 @@ export const getVendor = async (
 ) => {
 	const { vendorId } = req.params;
 
-	const vendor = await Vendor.findById(vendorId);
+	const exisitingVendor = await FindVendor(vendorId);
 
-	if (vendor !== null) {
-		return res.status(200).json({ result: vendor });
+	if (exisitingVendor !== null) {
+		return res.status(200).json({ result: exisitingVendor });
 	}
 
 	return res
